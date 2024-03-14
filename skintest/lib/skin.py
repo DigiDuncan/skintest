@@ -64,7 +64,7 @@ class Skin(benedict):
             with open(path / "skin.toml") as f:
                 tom = tomllib.loads(f.read())
             composed |= tom
-        return cls.from_data(path, composed)
+        return cls.from_data(root, composed)
 
 
 with pkg_resources.path(skintest.data, "skin") as p:
