@@ -27,7 +27,7 @@ class_map: dict[T, callable] = {
     Color: get_color
 }
 
-type_map: dict[str: T] = {
+type_map: dict[str, T] = {
     "colors.primary": Color,
     "colors.secondary": Color,
     "textures.icon": Texture,
