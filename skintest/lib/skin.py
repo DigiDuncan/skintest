@@ -1,6 +1,6 @@
 from pathlib import Path
 import tomllib
-from typing import TypeVar, Sequence
+from typing import Self, TypeVar, Sequence
 import importlib.resources as pkg_resources
 
 from benedict import benedict
@@ -41,16 +41,30 @@ class Skin(benedict):
         super().__init__(data, *args, **kwargs)
 
     @classmethod
-    def from_toml(cls, path: Path):
-        with open(path / "skin.toml") as f:
-            tom = tomllib.loads(f.read())
-        tom = benedict(tom)
+    def from_data(cls, path: Path, data: dict) -> Self:
+        data = benedict(data)
         for key, value in type_map.items():
             if value == Texture:
-                tom[key] = get_texture(path, tom[key])
+                data[key] = get_texture(path, data[key])
             elif value in class_map:
-                tom[key] = class_map[value](tom[key])
-        return cls(tom)
+                data[key] = class_map[value](data[key])
+        return cls(data)
+
+    @classmethod
+    def from_toml(cls, path: Path) -> Self:
+        with open(path / "skin.toml") as f:
+            tom = tomllib.loads(f.read())
+        return cls.from_data(path, tom)
+
+    @classmethod
+    def compose(cls, root: Path, paths: list[str]) -> Self:
+        composed = {}
+        for p in paths:
+            path = root / p
+            with open(path / "skin.toml") as f:
+                tom = tomllib.loads(f.read())
+            composed |= tom
+        return cls.from_data(path, composed)
 
 
 with pkg_resources.path(skintest.data, "skin") as p:
